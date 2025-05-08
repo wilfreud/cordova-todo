@@ -43,14 +43,38 @@ function markAsDone(id) {
 }
 
 function requestDelete(id) {
+  console.log("requestDelete called", id);
   deleteTargetId = id;
-  $("#confirmDeletePopup").popup("open");
+
+  if (navigator.notification && navigator.notification.confirm) {
+    navigator.notification.confirm(
+      "Are you sure you want to delete this task?",
+      (buttonIndex) => {
+        if (buttonIndex === 1) {
+          confirmDelete();
+        } else {
+          deleteTargetId = null;
+        }
+      },
+      "Delete Confirmation",
+      ["Delete", "Cancel"]
+    );
+  } else {
+    // Fallback for browser environment
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (isConfirmed) {
+      confirmDelete();
+    } else {
+      deleteTargetId = null;
+    }
+  }
 }
 
 function confirmDelete() {
   tasks = tasks.filter((t) => t.id !== deleteTargetId);
   deleteTargetId = null;
-  $("#confirmDeletePopup").popup("close");
   saveTasks();
   renderTasks();
 }
@@ -63,6 +87,18 @@ function resetTasks() {
   $("#taskInput").focus();
 }
 
+function editTask(id) {
+  const task = tasks.find((t) => t.id === id);
+  if (!task) return;
+
+  const newText = prompt("Modifier la tâche :", task.text);
+  if (newText !== null && newText.trim() !== "") {
+    task.text = newText.trim();
+    saveTasks();
+    renderTasks();
+  }
+}
+
 function renderTasks() {
   const todoList = $("#todoList").empty();
   const doneList = $("#doneList").empty();
@@ -72,9 +108,10 @@ function renderTasks() {
       `<li class="p-3 bg-gray-200 dark:bg-gray-700 rounded">${task.text}</li>`
     ).attr("data-id", task.id);
 
+    $li.on("swiperight", () => requestDelete(task.id));
     if (!task.done) {
       $li.on("swipeleft", () => markAsDone(task.id));
-      $li.on("swiperight", () => requestDelete(task.id));
+      // $li.on("click", () => editTask(task.id)); // Double-clic pour modifier
       todoList.append($li);
     } else {
       doneList.append($li);

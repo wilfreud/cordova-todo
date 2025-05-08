@@ -1,0 +1,69 @@
+/* Custom swipe animations */
+.swipe-left {
+  animation: swipeLeft 0.3s ease-out;
+}
+
+.swipe-right {
+  animation: swipeRight 0.3s ease-out;
+}
+
+@keyframes swipeLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes swipeRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Updated colors based on the provided palette */
+body {
+  background-color: #f3f3e0;
+  color: #183b4e;
+}
+
+#resetBtn {
+  background-color: #dda853 !important;
+  color: #f3f3e0 !important;
+}
+
+#addBtn {
+  background-color: #27548a !important;
+  color: #f3f3e0 !important;
+}
+
+header {
+  background-color: #27548a;
+  color: #f3f3e0;
+}
+
+/* Task list items */
+li {
+  background-color: #f3f3e0;
+  color: #183b4e;
+  border: 1px solid #dda853;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 5px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Updated for more contrast */
+li {
+  background-color: #ffffff; /* Brighter background */
+  color: #000000; /* Darker text */
+}
