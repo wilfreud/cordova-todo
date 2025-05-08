@@ -91,11 +91,28 @@ function editTask(id) {
   const task = tasks.find((t) => t.id === id);
   if (!task) return;
 
-  const newText = prompt("Modifier la tâche :", task.text);
-  if (newText !== null && newText.trim() !== "") {
-    task.text = newText.trim();
-    saveTasks();
-    renderTasks();
+  if (navigator.notification && navigator.notification.prompt) {
+    navigator.notification.prompt(
+      "Edit the task:",
+      (result) => {
+        if (result.buttonIndex === 1 && result.input1.trim() !== "") {
+          task.text = result.input1.trim();
+          saveTasks();
+          renderTasks();
+        }
+      },
+      "Edit Task",
+      ["Save", "Cancel"],
+      task.text
+    );
+  } else {
+    // Fallback for browser environment
+    const newText = prompt("Edit the task:", task.text);
+    if (newText !== null && newText.trim() !== "") {
+      task.text = newText.trim();
+      saveTasks();
+      renderTasks();
+    }
   }
 }
 
@@ -111,7 +128,7 @@ function renderTasks() {
     $li.on("swiperight", () => requestDelete(task.id));
     if (!task.done) {
       $li.on("swipeleft", () => markAsDone(task.id));
-      // $li.on("click", () => editTask(task.id)); // Double-clic pour modifier
+      $li.on("click", () => editTask(task.id)); // Double-clic pour modifier
       todoList.append($li);
     } else {
       doneList.append($li);
