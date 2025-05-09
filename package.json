@@ -2,7 +2,7 @@
   "name": "dev.commodore64.m2.todo",
   "displayName": "C64 Todo",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "A simple to-do app.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,7 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "author": "Apache Cordova Team",
+  "author": "Commodore64",
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^13.0.0",
