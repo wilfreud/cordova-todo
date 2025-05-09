@@ -33,18 +33,32 @@ function addTask() {
   input.focus();
   saveTasks();
   renderTasks();
+
+  // Animation pour la nouvelle tâche
+  const newTask = $(`[data-id="${tasks[tasks.length - 1].id}"]`);
+  newTask.hide().fadeIn(300);
 }
 
 function markAsDone(id) {
   const task = tasks.find((t) => t.id === id);
   if (task) task.done = true;
-  saveTasks();
-  renderTasks();
+
+  // Animation lors du marquage comme terminé
+  const $taskElement = $(`li[data-id="${id}"]`);
+  $taskElement.animate({ opacity: 0.5, marginLeft: "100%" }, 400, function () {
+    saveTasks();
+    renderTasks();
+  });
 }
 
 function requestDelete(id) {
   console.log("requestDelete called", id);
   deleteTargetId = id;
+
+  // Ajouter une classe visuelle pour indiquer que la tâche est sélectionnée pour suppression
+  $(`li[data-id="${id}"]`)
+    .addClass("delete-pending")
+    .css("background-color", "#ffdddd");
 
   if (navigator.notification && navigator.notification.confirm) {
     navigator.notification.confirm(
@@ -54,6 +68,9 @@ function requestDelete(id) {
           confirmDelete();
         } else {
           deleteTargetId = null;
+          $(`li[data-id="${id}"]`)
+            .removeClass("delete-pending")
+            .css("background-color", "");
         }
       },
       "Delete Confirmation",
@@ -68,26 +85,40 @@ function requestDelete(id) {
       confirmDelete();
     } else {
       deleteTargetId = null;
+      $(`li[data-id="${id}"]`)
+        .removeClass("delete-pending")
+        .css("background-color", "");
     }
   }
 }
 
 function confirmDelete() {
-  tasks = tasks.filter((t) => t.id !== deleteTargetId);
-  deleteTargetId = null;
-  saveTasks();
-  renderTasks();
+  // Animation pour la suppression
+  const $taskToDelete = $(`li[data-id="${deleteTargetId}"]`);
+  $taskToDelete.slideUp(300, function () {
+    tasks = tasks.filter((t) => t.id !== deleteTargetId);
+    deleteTargetId = null;
+    saveTasks();
+    renderTasks();
+  });
 }
 
 function resetTasks() {
   console.log("resetTasks called");
-  tasks = [];
-  saveTasks();
-  renderTasks();
-  $("#taskInput").focus();
+  // Animation pour le reset
+  $("#todoList li, #doneList li").fadeOut(300, function () {
+    tasks = [];
+    saveTasks();
+    renderTasks();
+    $("#taskInput").focus();
+  });
 }
 
 function editTask(id) {
+  // Ajout d'une légère animation sur la tâche en cours de modification
+  const $taskElement = $(`li[data-id="${id}"]`);
+  $taskElement.fadeOut(100).fadeIn(100);
+
   const task = tasks.find((t) => t.id === id);
   if (!task) return;
 
@@ -99,6 +130,8 @@ function editTask(id) {
           task.text = result.input1.trim();
           saveTasks();
           renderTasks();
+          // Mettre en évidence la tâche modifiée
+          $(`li[data-id="${id}"]`).hide().fadeIn(300);
         }
       },
       "Edit Task",
@@ -112,6 +145,8 @@ function editTask(id) {
       task.text = newText.trim();
       saveTasks();
       renderTasks();
+      // Mettre en évidence la tâche modifiée
+      $(`li[data-id="${id}"]`).hide().fadeIn(300);
     }
   }
 }
@@ -122,12 +157,34 @@ function renderTasks() {
 
   tasks.forEach((task) => {
     const $li = $(
-      `<li class="p-3 bg-gray-200 dark:bg-gray-700 rounded">${task.text}</li>`
+      `<li class="p-3 bg-gray-200 dark:bg-gray-700 rounded transition-all duration-300">${task.text}</li>`
     ).attr("data-id", task.id);
 
-    $li.on("swiperight", () => requestDelete(task.id));
+    // Ajouter des gestionnaires d'évènements pour les animations de glissement
+    $li.on("swiperight", function () {
+      $(this).animate({ marginLeft: "50px", opacity: 0.7 }, 150, function () {
+        $(this).animate({ marginLeft: "0px", opacity: 1 }, 150, function () {
+          requestDelete(task.id);
+        });
+      });
+    });
+
     if (!task.done) {
-      $li.on("swipeleft", () => markAsDone(task.id));
+      $li.on("swipeleft", function () {
+        $(this).animate(
+          { marginLeft: "-50px", opacity: 0.7 },
+          150,
+          function () {
+            $(this).animate(
+              { marginLeft: "0px", opacity: 1 },
+              150,
+              function () {
+                markAsDone(task.id);
+              }
+            );
+          }
+        );
+      });
       $li.on("click", () => editTask(task.id)); // Double-clic pour modifier
       todoList.append($li);
     } else {
